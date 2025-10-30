@@ -1,0 +1,598 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #212529;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.03) 50%, transparent 51%);
+        pointer-events: none;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .create-btn {
+        background: white;
+        color: #000000;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+        background: #f8f9fa;
+    }
+
+    .btn-icon {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    /* Tabs */
+    .tabs-container {
+        margin-bottom: 2rem;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        width: fit-content;
+    }
+
+    .tab-btn {
+        background: transparent;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+        text-decoration: none;
+    }
+
+    .tab-btn.active {
+        background: #000000;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: #f8f9fa;
+        color: #495057;
+    }
+
+    .tab-icon {
+        font-size: 1rem;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        position: relative;
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Events Grid */
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Event Cards */
+    .event-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .event-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #333333, transparent);
+        transition: left 0.5s ease;
+    }
+
+    .event-card:hover::before {
+        left: 100%;
+    }
+
+    .event-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Event Header */
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+
+    .event-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        letter-spacing: -0.01em;
+        margin: 0;
+        flex: 1;
+    }
+
+    .event-status {
+        flex-shrink: 0;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.available {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-badge.virtual {
+        background: #e2e3f1;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .status-badge.full {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-badge.school {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    /* Event Meta */
+    .event-meta {
+        margin-bottom: 1.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .meta-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .meta-icon {
+        font-size: 0.9rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    .meta-text {
+        font-weight: 500;
+    }
+
+    /* Event Actions */
+    .event-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-disabled {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: #000000;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #333333;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-secondary:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .events-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .event-card {
+            padding: 1.25rem;
+        }
+
+        .event-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .event-actions {
+            flex-direction: column;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-disabled {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .tabs {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .events-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .event-card {
+            padding: 1rem;
+        }
+
+        .event-title {
+            font-size: 1.1rem;
+        }
+
+        .meta-item {
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">📅 Events</h1>
+
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="global">
+                <span class="tab-icon">🌍</span>
+                Global Events
+            </button>
+            <a href="#myschoolevents" class="tab-btn" data-tab="school">
+                <span class="tab-icon">🏫</span>
+                My School
+            </a>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Global Events Tab -->
+        <div class="tab-pane active" id="global">
+            <div class="events-grid">
+                <!-- Event Card 1 -->
+                 {% if global_events.0 %}
+                 {% for event in global_events %}
+                <div class="event-card">
+                    <div class="event-header">
+                        <h3 class="event-title">{{ event.name }}</h3>
+                        <div class="event-status">
+                            {% if event.status == "Housefull" %}
+                            <span class="status-badge full">{{ event.status }}</span>
+                            {% else %}
+                            <span class="status-badge available">{{ event.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span class="meta-text">{{event.date}} • {{event.time}}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👤</span>
+                            <span class="meta-text">{{event.organised_by.name}}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <span class="meta-text">{{ event.location }}</span>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <a  href="{% url 'event_page' event.id %}" class="btn bg-dark text-light">View Event</a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="event-card">
+                    <div class="event-header">
+                        <h3 class="event-title">No events to show</h3>
+                        
+                    </div>
+                    
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- School Events Tab -->
+        <div class="tab-pane" id="school">
+            <div class="events-grid">
+                <!-- School Event Card 1 -->
+                  {% if school_events.0 %}
+                 {% for event in school_events %}
+                <div class="event-card">
+                    <div class="event-header">
+                        <h3 class="event-title">{{ event.name }}</h3>
+                        <div class="event-status">
+                            {% if event.status == "Housefull" %}
+                            <span class="status-badge full">{{ event.status }}</span>
+                            {% else %}
+                            <span class="status-badge available">{{ event.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span class="meta-text">{{event.date}} • {{event.time}}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👤</span>
+                            <span class="meta-text">{{event.organised_by.name}}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <span class="meta-text">{{ event.location }}</span>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <a href="{% url 'event_page' event.id %}" class="btn-primary">View Event</a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="event-card">
+                    <div class="event-header">
+                        <h3 class="event-title">No events to show</h3>
+                        
+                    </div>
+                    
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const targetTab = this.getAttribute('data-tab');
+
+                // Remove active class from all tabs and panes
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding pane
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // Add click animations to buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                if (!this.disabled) {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                }
+            });
+        });
+
+        // Add staggered animation to event cards
+        const eventCards = document.querySelectorAll('.event-card');
+        eventCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}

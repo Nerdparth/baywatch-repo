@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #212529;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .container-fluid {
+    padding: 0;
+  }
+
+  .header-content {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+  }
+
+  .map-wrapper {
+    display: flex;
+    height: calc(100vh - 180px);
+  }
+
+  #baymap {
+    flex: 1;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .sidebar {
+    width: 300px;
+    background: white;
+    padding: 1.5rem;
+    border-left: 1px solid rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+
+  .sidebar h5 { margin-bottom: 1rem; }
+  .indicator-card {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+  }
+
+  .legend div {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .legend span {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 8px;
+    border-radius: 3px;
+  }
+
+  @media(max-width:768px){
+    .map-wrapper { flex-direction: column; }
+    .sidebar { width: 100%; height: 250px; border-top: 1px solid #ccc; }
+  }
+</style>
+
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="header-content">
+    <h1 class="page-title">Bay Map</h1>
+    <p class="page-subtitle">Explore adopted sections and live water health indicators</p>
+  </div>
+
+  <!-- Map + Sidebar -->
+  <div class="map-wrapper">
+    <div id="baymap"></div>
+    <div class="sidebar">
+      <h5>Live Indicators</h5>
+      <div class="indicator-card">🌡️ Air Temperature: <strong id="temperature"></strong></div>
+      <div class="indicator-card">💨 Wind Speed: <strong id="windSpeed"></strong></div>
+      <div class="indicator-card">🌊 Water Level: <strong id="waterLevel"></strong></div>
+      <div class="indicator-card">💧 pH Level: <strong id="ph"></strong></div>
+      <div class="indicator-card">🌱 Oxygen: <strong id="oxygen"></strong></div>
+
+      <h5>Legend</h5>
+      <div class="legend">
+        <div><span style="background:{{my_school.theme_color}}"></span> Your School Section</div>
+        <div><span style="background:#e83f4d"></span> Un-Adopted Bay-Area</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", 
+function () {
+  // Center map on Chesapeake Beach
+  var map = L.map('baymap').setView([38.697, -76.542], 13);
+
+  // testing map
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // production map
+//   L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=Ncne5MCNQbnF5NyhI56e	', {
+//   attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> &copy; <a href="https://www.maptiler.com/">MapTiler</a>'
+// }).addTo(map);
+
+  // Main Chesapeake Beach polygon
+  var mainPolygon = L.polygon([
+  [38.7115, -76.5505],  // NW corner
+  [38.7115, -76.5320],  // NE corner
+  [38.6770, -76.5320],  // SE corner
+  [38.6770, -76.5505]
+  ], {
+    color: "#f50014",
+    fillColor: "#e83f4d",
+    fillOpacity: 0.1,
+    weight: 2
+  }).addTo(map).bindPopup("Un-Adopted Chesapeake Bay Area");
+
+
+  
+
+  // Inner polygons
+  var innerPolygons = [
+{% for school in schools %}
+{
+    coords: [
+        [{{ school.coordinate1_lat|floatformat:6 }}, {{ school.coordinate1_lng|floatformat:6 }}],
+        [{{ school.coordinate2_lat|floatformat:6 }}, {{ school.coordinate2_lng|floatformat:6 }}],
+        [{{ school.coordinate3_lat|floatformat:6 }}, {{ school.coordinate3_lng|floatformat:6 }}],
+        [{{ school.coordinate4_lat|floatformat:6 }}, {{ school.coordinate4_lng|floatformat:6 }}]
+    ],
+    name: "{{ school.name }}",
+    color: "{{ school.theme_color }}"
+},
+{% endfor %}
+     ];
+
+  innerPolygons.forEach(function(polygon) {
+    var poly = L.polygon(polygon.coords).addTo(map).bindPopup(polygon.name);
+     var poly = L.polygon(polygon.coords, {
+      color: polygon.color,       // border color
+      fillColor: polygon.color,   // fill color
+      fillOpacity: 0.2,
+      weight: 2
+    }).addTo(map).bindPopup(polygon.name);
+
+    // Add marker to approximate center
+    var latSum = 0, lngSum = 0;
+    polygon.coords.forEach(function(pt){ latSum += pt[0]; lngSum += pt[1]; });
+    var centerLat = latSum / polygon.coords.length;
+    var centerLng = lngSum / polygon.coords.length;
+
+    L.marker([centerLat, centerLng]).addTo(map).bindPopup(polygon.name + " Center");
+  });
+
+    fetch("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=8570283&product=air_temperature&units=metric&time_zone=lst&format=json&date=latest").then(response => response.json()).then(data => {
+      if(data.data && data.data.length > 0){
+            const latest = data.data[0];
+            const temperature = latest.v;
+            document.getElementById("temperature").innerText = temperature + "°C"
+            
+    }}).catch(err => console.error("Error fetching NOAA data:", err));
+
+
+    fetch("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=8570283&product=wind&units=metric&time_zone=lst&format=json&date=latest").then(response => response.json()).then(data => {
+      if(data.data && data.data.length > 0){
+            const latest = data.data[0];
+            const speed = latest.s;
+            document.getElementById("windSpeed").innerText = speed + " m/s"
+            
+    }}).catch(err => console.error("Error fetching NOAA data:", err));
+
+    fetch("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=8570283&product=water_level&units=metric&time_zone=lst&format=json&date=latest&datum=MLLW").then(response => response.json()).then(data => {
+      if(data.data && data.data.length > 0){
+            const latest = data.data[0];
+            const waterLevel = latest.v;
+            document.getElementById("waterLevel").innerText = waterLevel + " m"
+            
+    }}).catch(err => console.error("Error fetching NOAA data:", err));
+
+    fetch("https://waterservices.usgs.gov/nwis/iv/?sites=01491000&parameterCd=00400&format=json&siteStatus=active&period=P1D")
+  .then(response => response.json())
+  .then(data => {
+      const timeSeries = data.value.timeSeries;
+      if(timeSeries.length > 0){
+          const phSeries = timeSeries[0].values[0].value;
+          const latest = phSeries[phSeries.length - 1];
+          console.log("Latest pH:", latest.value, "at", latest.dateTime);
+          document.getElementById("ph").textContent = latest.value;
+      }
+  })
+  .catch(err => console.error(err));
+
+  fetch("https://waterservices.usgs.gov/nwis/iv/?sites=01491000&parameterCd=00300&format=json&siteStatus=active&period=P1D")
+  .then(response => response.json())
+  .then(data => {
+      const timeSeries = data.value.timeSeries;
+      if(timeSeries.length > 0){
+          const doSeries = timeSeries[0].values[0].value;
+          const latest = doSeries[doSeries.length - 1];
+          console.log("Latest DO:", latest.value, "mg/L at", latest.dateTime);
+          document.getElementById("oxygen").textContent = latest.value + " mg/L";
+      }
+  })
+  .catch(err => console.error(err));
+
+
+
+
+});
+</script>
+{% endblock %}

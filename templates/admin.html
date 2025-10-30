@@ -1,0 +1,1130 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #212529;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Navigation Tabs */
+    .admin-nav {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        margin-bottom: 2rem;
+        padding: 1rem;
+    }
+
+    .nav-tabs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-tab {
+        padding: 1rem 2rem;
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-tab:hover {
+        background: #f8f9fa;
+        color: #000;
+    }
+
+    .nav-tab.active {
+        background: #000;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Welcome Banner */
+    .admin-banner {
+        background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .admin-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.03) 50%, transparent 51%);
+        pointer-events: none;
+    }
+
+    .admin-banner h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .admin-banner p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    /* Cards */
+    .admin-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+
+    .admin-card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        padding: 2rem 2.5rem 1.5rem;
+        border-bottom: 1px solid #f1f3f4;
+        background: #fafbfc;
+    }
+
+    .card-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        letter-spacing: -0.01em;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-header p {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .card-body {
+        padding: 2.5rem;
+    }
+
+    /* Forms */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        letter-spacing: -0.01em;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #000;
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-control:hover {
+        border-color: #ccc;
+    }
+
+    /* Coordinate Grid */
+    .coordinate-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .coordinate-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+
+    .coordinate-group h4 {
+        color: #1a1a1a;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .coordinate-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /* Buttons */
+    #btn-cs {
+        padding: 0.5rem;
+        
+        letter-spacing: 0.5px;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: #000;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #333;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.2);
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.2);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    /* Stats Dashboard */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #333333, transparent);
+        transition: left 0.5s ease;
+    }
+
+    .stat-card:hover::before {
+        left: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Tables */
+    .table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .admin-table th {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .admin-table td {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f1f3f4;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .admin-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .admin-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .badge-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    /* Backdrop */
+    .custom-modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+
+        display: grid;
+        place-items: center;
+        /* centers modal */
+        padding: 1rem;
+        /* spacing on small screens */
+    }
+
+    /* Modal content */
+    .custom-modal-content {
+        background: #fff;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        /* never exceed viewport */
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+        display: grid;
+        grid-template-rows: auto 1fr;
+        /* title + scrollable form */
+        overflow: hidden;
+    }
+
+    /* Title */
+    .modal-title {
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Scrollable body */
+    .modal-body-grid {
+        overflow-y: auto;
+        padding: 15px 20px;
+    }
+
+    /* Close button */
+    .custom-modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 22px;
+        cursor: pointer;
+    }
+
+
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .admin-banner {
+            padding: 2rem;
+        }
+
+        .admin-banner h1 {
+            font-size: 2rem;
+        }
+
+        .nav-tabs {
+            flex-direction: column;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .coordinate-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .coordinate-inputs {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 1rem 0.5rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .admin-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .stat-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .stat-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .stat-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .stat-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
+
+<body>
+    <div class="container">
+        {% if is_admin %}
+        <!-- Admin Banner -->
+        <div class="admin-banner">
+            <h1>School Administration Panel 🏫</h1>
+            <p>Manage your school's environmental initiatives and bay area conservation efforts</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="admin-nav">
+            <div class="nav-tabs">
+                {% if active_tab == "details" %}
+                <button class="nav-tab active" onclick="showTab('school-details')">
+                    <span class="nav-icon">🏫</span>
+                    School Details
+                </button>
+                {% else %}
+                <button class="nav-tab" onclick="showTab('school-details')">
+                    <span class="nav-icon">🏫</span>
+                    School Details
+                </button>
+                {% endif %}
+                <button class="nav-tab" onclick="showTab('create-event')">
+                    <span class="nav-icon">➕</span>
+                    Create Event
+                </button>
+                {% if active_tab == "events" %}
+                <button class="nav-tab active" onclick="showTab('manage-events')">
+                    <span class="nav-icon">📅</span>
+                    Manage Events
+                </button>
+                {% else %}
+                <button class="nav-tab" onclick="showTab('manage-events')">
+                    <span class="nav-icon">📅</span>
+                    Manage Events
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+
+        <!-- School Details Tab -->
+        <div id="school-details" class='tab-content {% if active_tab == "details" %}active{% endif %}'>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>School Information</h2>
+                    <p>Update your school's basic information and bay area coordinates</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'school_admin' 'details' %}">
+                        {% csrf_token %}
+                        <!-- Basic Information -->
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="school_name">School Name</label>
+                                <input type="text" id="school_name" name="name" class="form-control"
+                                    value="{{ school.name }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="adopted_section">Adopted Bay Section</label>
+                                <input type="text" id="adopted_section" name="adopted_section" class="form-control"
+                                    value="{{ school.adopted_section }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="no_of_students">Number of Students</label>
+                                <input type="number" id="no_of_students" name="no_of_students" class="form-control"
+                                    value="{{ school.no_of_students }}" min="0" required>
+                            </div>
+                        </div>
+
+                        <!-- Bay Area Coordinates -->
+                        <h3 style="margin: 3rem 0 2rem 0; color: #1a1a1a; font-weight: 600;">Bay Area Boundary
+                            Coordinates</h3>
+
+                        <div class="coordinate-grid">
+                            <div class="coordinate-group">
+                                <h4>📍 Coordinate Point 1</h4>
+                                <div class="coordinate-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord1_lat">Latitude</label>
+                                        <input type="number" step="0.000001" id="coord1_lat" name="coordinate1_lat"
+                                            class="form-control" value="{{ school.coordinate1_lat }}"
+                                            placeholder="38.699000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord1_lng">Longitude</label>
+                                        <input type="number" step="0.000001" id="coord1_lng" name="coordinate1_lng"
+                                            class="form-control" value="{{ school.coordinate1_lng }}"
+                                            placeholder="-76.550000" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="coordinate-group">
+                                <h4>📍 Coordinate Point 2</h4>
+                                <div class="coordinate-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord2_lat">Latitude</label>
+                                        <input type="number" step="0.000001" id="coord2_lat" name="coordinate2_lat"
+                                            class="form-control" value="{{ school.coordinate2_lat }}"
+                                            placeholder="38.701000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord2_lng">Longitude</label>
+                                        <input type="number" step="0.000001" id="coord2_lng" name="coordinate2_lng"
+                                            class="form-control" value="{{ school.coordinate2_lng }}"
+                                            placeholder="-76.545000" required>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="coordinate-grid">
+                            <div class="coordinate-group">
+                                <h4>📍 Coordinate Point 3</h4>
+                                <div class="coordinate-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord3_lat">Latitude</label>
+                                        <input type="number" step="0.000001" id="coord3_lat" name="coordinate3_lat"
+                                            class="form-control" value="{{ school.coordinate3_lat }}"
+                                            placeholder="38.698000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord3_lng">Longitude</label>
+                                        <input type="number" step="0.000001" id="coord3_lng" name="coordinate3_lng"
+                                            class="form-control" value="{{ school.coordinate3_lng }}"
+                                            placeholder="-76.542000" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="coordinate-group">
+                                <h4>📍 Coordinate Point 4</h4>
+                                <div class="coordinate-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord4_lat">Latitude</label>
+                                        <input type="number" step="0.000001" id="coord4_lat" name="coordinate4_lat"
+                                            class="form-control" value="{{ school.coordinate4_lat }}"
+                                            placeholder="38.696000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="coord4_lng">Longitude</label>
+                                        <input type="number" step="0.000001" id="coord4_lng" name="coordinate4_lng"
+                                            class="form-control" value="{{ school.coordinate4_lng }}"
+                                            placeholder="-76.547000" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" name="school_update" class="btn btn-success">
+                                💾 Save Changes
+                            </button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Event Tab -->
+        <div id="create-event" class="tab-content">
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>Create New Event</h2>
+                    <p>Organize a new environmental conservation event or cleanup drive</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'school_admin' 'details' %}">
+                        {% csrf_token %}
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="event_title">Event Title</label>
+                                <input type="text" id="event_title" name="title" class="form-control"
+                                    placeholder="Enter Event Title" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="event_date">Event Date</label>
+                                <input type="date" id="event_date" name="date" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="event_time">Event Time</label>
+                                <input type="time" id="event_time" name="time" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="event_location">Location</label>
+                                <input type="text" id="event_location" name="location" class="form-control"
+                                    placeholder="Enter Event Location" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="expected_participants">Expected Participants</label>
+                                <input type="number" id="expected_participants" name="expected_participants"
+                                    class="form-control" min="1" placeholder="number of Participants" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="event_type">Event Type</label>
+                                <select id="event_type" name="event_type" class="form-control" required>
+                                    <option value="">Select Event Type</option>
+                                    <option value="cleanup">Beach/Bay Cleanup</option>
+                                    <option value="workshop">Educational Workshop</option>
+                                    <option value="plantation">Tree Plantation</option>
+                                    <option value="awareness">Awareness Campaign</option>
+                                    <option value="research">Research Activity</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="event_description">Event Description</label>
+                            <textarea id="event_description" name="description" class="form-control" rows="4"
+                                placeholder="Describe the event objectives, activities, and expected outcomes..."
+                                required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="requirements">Requirements & Materials</label>
+                            <textarea id="requirements" name="requirements" class="form-control" rows="3"
+                                placeholder="List any materials, equipment, or preparations needed for the event..."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" name="create_event" class="btn btn-success">
+                                ✅ Create Event
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                🗑️ Clear Form
+                            </button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Events Tab -->
+        <div id="manage-events" class='tab-content {% if active_tab == "events" %}active{% endif %}'>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>Event Management</h2>
+                    <p>View, edit, and manage all your environmental events</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Event Title</th>
+                                    <th>Date & Time</th>
+                                    <th>Location</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if events.0 %}
+                                {% for event in events %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ event.name }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ event.date }}<br>
+                                        <small style="color: #6c757d;">{{ event.time }}</small>
+                                    </td>
+                                    <td>{{ event.location }}</td>
+                                    
+                                    <td>
+                                        <span class="badge badge-info">{{ event.event_type }}</span>
+                                    </td>
+                                    <td>
+                                        {% if event.status == "completed" %}
+                                        <span class="badge badge-success">completed</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">upcoming</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button type="button" onclick="openModal('customModal{{ event.id }}')"
+                                                class="btn btn-sm btn-primary">✏️ Edit</button>
+                                            <div id="customModal{{ event.id }}" class="custom-modal" style="display:none;">
+                                                <div class="custom-modal-content">
+                                                    <span class="custom-modal-close"
+                                                        onclick="closeModal('customModal{{ event.id }}')">&times;</span>
+                                                    <h5 class="modal-title">Update Event</h5>
+
+                                                    <div class="modal-body-grid">
+                                                        <form id="updateEventForm" method="post" action="{% url 'school_admin' 'events' %}">
+                                                            {% csrf_token %}
+                                                            <div class="mb-2">
+                                                                <label>Name</label>
+                                                                <input type="text" name="title" class="form-control"
+                                                                    value="{{ event.name }}" required>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Description</label>
+                                                                <textarea name="description"
+                                                                    class="form-control">{{event.description}}</textarea>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Requirements</label>
+                                                                <textarea name="requirements"
+                                                                    class="form-control">{{ event.requirements }}</textarea>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Event Type</label>
+                                                                <select name="event_type" class="form-select">
+                                                                    {% if event.event_type == "cleanup" %}
+                                                                    <option value="cleanup" selected>Beach/Bay Cleanup
+                                                                    </option>
+                                                                    {% else %}
+                                                                    <option value="cleanup">Beach/Bay Cleanup</option>
+                                                                    {% endif %}
+                                                                    {% if event.type == "workshop" %}
+                                                                    <option value="workshop" selected>Educational
+                                                                        Workshop</option>
+                                                                    {% else %}
+                                                                    <option value="workshop">Educational Workshop
+                                                                    </option>
+                                                                    {% endif %}
+                                                                    {% if event.type == "plantation" %}
+                                                                    <option value="plantation" selected>Tree Plantation
+                                                                    </option>
+                                                                    {% else %}
+                                                                    <option value="plantation">Tree Plantation</option>
+                                                                    {% endif %}
+                                                                    {% if event.type == "awareness" %}
+                                                                    <option value="awareness" selected>Awareness
+                                                                        Campaign</option>
+                                                                    {% else %}
+                                                                    <option value="awareness">Awareness Campaign
+                                                                    </option>
+                                                                    {% endif %}
+                                                                    {% if event.type == "research" %}
+                                                                    <option value="research" selected>Research Activity
+                                                                    </option>
+                                                                    {% else %}
+                                                                    <option value="research">Research Activity</option>
+                                                                    {% endif %}
+                                                                    {% if event.type == "other" %}
+                                                                    <option value="other" selected>Other</option>
+                                                                    {% else %}
+                                                                    <option value="other">Other</option>
+                                                                    {% endif %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Location</label>
+                                                                <input type="text" name="location"
+                                                                    value="{{event.location}}" class="form-control">
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Date</label>
+                                                                <input type="date" name="date"
+                                                                    value="{{ event.date|date:'Y-m-d' }}"
+                                                                    class="form-control">
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Time</label>
+                                                                <input type="time" name="time"
+                                                                    value="{{ event.time|time:'H:i' }}"
+                                                                    class="form-control">
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Expected Participants</label>
+                                                                <input type="number" name="expected_participants"
+                                                                    value="{{ event.expected_participants }}"
+                                                                    class="form-control">
+                                                            </div>
+                                                            <input type="number" name="event_id" value="{{event.id}}" hidden>
+                                                            <button type="submit" name="update_event" class="btn btn-success mt-2">Update
+                                                                Event</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                                
+                                                <button class="btn btn-sm btn-danger" type="button" onclick="openModal('deleteEvent')" >🗑️ Delete</button>
+                                                <div id="deleteEvent" class="custom-modal" style="display:none;">
+                                                <div class="custom-modal-content">
+                                            
+                                                    <h5 class="modal-title">Are You Sure You want To Delete {{event.name}}?</h5>
+
+                                                    <div class="modal-body-grid">
+                                                        <form id="updateEventForm" method="post" action="">
+                                                            {% csrf_token %}
+                                                            <input type="number" name="event_id" value="{{ event.id }}" hidden>
+                                                            <button type="submit" name="delete_event" name="update_progress" class="btn btn-danger mt-2">Yes, Delete</button>
+                                                            <button type="button" onclick="closeModal('deleteEvent')" class="btn btn-primary mt-2">Cancel</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success mt-2" onclick="openModal('customUpdateModal{{ event.id }}')">Update</button>
+                                        <div id="customUpdateModal{{event.id}}" class="custom-modal" style="display:none;">
+                                                <div class="custom-modal-content">
+                                                    <span class="custom-modal-close"
+                                                        onclick="closeModal('customUpdateModal{{ event.id }}')">&times;</span>
+                                                    <h5 class="modal-title">Update Progress</h5>
+
+                                                    <div class="modal-body-grid">
+                                                        <form id="updateEventForm" method="post" action="{% url 'school_admin' 'events' %}">
+                                                            {% csrf_token %}
+                                                            <div class="mb-2">
+                                                                <label>Garbage Collected</label>
+                                                                <input type="number" name="garbage" class="form-control"
+                                                                    value="{{ event.waste_collected }}" required>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Plastic Collected</label>
+                                                                <input type="number" name="plastic" class="form-control"
+                                                                    value="{{ event.plastic_collected }}" required>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Paper Collected</label>
+                                                                <input type="number" name="paper" class="form-control"
+                                                                    value="{{ event.paper_collected }}" required>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Glass Collected</label>
+                                                                <input type="number" name="glass" class="form-control"
+                                                                    value="{{ event.glass_collected }}" required>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label>Miscellaneous Collected</label>
+                                                                <input type="number" name="miscellaneous" class="form-control"
+                                                                    value="{{ event.miscellaneous_collected }}" required>
+                                                            </div>
+                                                            
+                                                            <input type="number" name="event_id" value="{{event.id}}" hidden>
+                                                            <button type="submit" name="update_progress" class="btn btn-success mt-2">Update
+                                                                Progress</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td>
+                                        <strong>No events to show</strong>
+                                    </td>
+                                    
+
+
+                                </tr>
+                                {% endif %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).style.display = "grid";
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+
+        // Close on backdrop click
+        window.onclick = function(event) {
+    const modals = document.querySelectorAll('.custom-modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+
+    </script>
+
+    {% else %}
+    <h1>You don't have access to this page</h1>
+    <a href="{% url 'logout' %}">Please click here to login as admin</a>
+    {% endif %}
+    {% endblock %}

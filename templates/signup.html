@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Signup - Bay Conservation Initiative</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: #212529;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .signup-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+        }
+
+        .signup-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #000000, #333333, #000000);
+        }
+
+        .signup-header {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.03) 50%, transparent 51%);
+            pointer-events: none;
+        }
+
+        .signup-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .signup-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .signup-form {
+            padding: 2.5rem 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+            color: #495057;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-control:hover {
+            border-color: #ccc;
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+            font-weight: 400;
+        }
+
+        /* School Search Dropdown */
+        .school-search-container {
+            position: relative;
+        }
+
+        .school-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .school-results.show {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        .school-option {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f8f9fa;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .school-option:last-child {
+            border-bottom: none;
+        }
+
+        .school-option:hover {
+            background: #f8f9fa;
+            color: #000;
+            transform: translateX(4px);
+        }
+
+        .school-option.highlighted {
+            background: #000;
+            color: white;
+        }
+
+        .no-results {
+            padding: 1rem 1.25rem;
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f1f3f4;
+        }
+
+        .login-link a {
+            color: #000;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .login-link a:hover {
+            color: #333;
+            text-decoration: underline;
+        }
+
+                .toast {
+    visibility: hidden; /* Hidden by default. Visible on click */
+    min-width: 250px; 
+    background-color: #fafafa; 
+    color: #fff; 
+    text-align: center; 
+    border-radius: 12px; 
+    padding: 16px; 
+    position: fixed;
+    z-index: 10; 
+    bottom: 10%;
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    bottom: 30px; 
+    font-size: 17px;
+    opacity: 0; /* Invisible by default */
+    
+    transition: opacity 0.5s ease-in-out, bottom 0.5s ease-in-out;
+}
+.toast-error {
+    /* background-color: #f44336; */
+    color: rgb(60, 0, 0);
+}
+.toast-success {
+    color: rgb(0, 59, 0);
+}
+.toast-info {
+    /* background-color: #2196F3; */
+    color: rgb(0, 0, 49);
+}
+.toast-warning {
+    /* background-color: #ff9800; */
+    color: rgb(118, 87, 0);
+}
+.toast.show {
+    visibility: visible; /* Show the toast */
+    opacity: 0.8; /* Fully visible */
+    bottom: 20px; /* Move it up a bit */
+}
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            
+            .signup-header {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+            
+            .signup-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .signup-form {
+                padding: 2rem 1.5rem;
+            }
+            
+            .form-control {
+                padding: 0.875rem 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signup-container {
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* Custom Scrollbar for dropdown */
+        .school-results::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .school-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .school-results::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .school-results::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Input validation states */
+        .form-control.valid {
+            border-color: #28a745;
+        }
+
+        .form-control.invalid {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    {% if messages %}
+    {% for message in messages %}
+    <div id="toast" class="toast show toast-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Join the Movement 🌊</h1>
+            <p>Help protect our bay areas and marine ecosystems</p>
+        </div>
+        
+        <form class="signup-form" method="POST" id="signupForm" action="{% url 'register' %}">
+           {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="fullName">Username</label>
+                <input type="text" id="fullName" name="username" class="form-control" 
+                       placeholder="username" required>
+                <div class="error-message" id="nameError">Please enter your full name</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="schoolInput">School</label>
+                <div class="school-search-container">
+                    <input type="text" id="schoolInput" name="school" class="form-control" 
+                           placeholder="Search and select your school..." 
+                           autocomplete="off" required>
+                    <input type="text" name="school_id" id="school_id" hidden>
+                    <div id="schoolResults" class="school-results"></div>
+                </div>
+                <div class="error-message" id="schoolError">Please select a school from the list</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" 
+                       placeholder="Enter your email address" required>
+                <div class="error-message" id="emailError">Please enter a valid email address</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" 
+                       placeholder="Create a strong password" required>
+                <div class="error-message" id="passwordError">Password must be at least 8 characters long</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirm_password" class="form-control" 
+                       placeholder="Confirm your password" required>
+                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Create Account
+            </button>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="/login/">Sign in here</a></p>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    // Schools is passed from Django as: [{"id": 1, "name": "ABC School"}, ...]
+    let schools = {{ schools|safe }};
+    console.log("Loaded schools:", schools);
+
+    // DOM elements
+    const schoolInput = document.getElementById('schoolInput');
+    const schoolResults = document.getElementById('schoolResults');
+    const signupForm = document.getElementById('signupForm');
+    
+    let selectedSchool = null; // we'll store the full object (id + name)
+    let currentHighlight = -1;
+
+    // School search functionality
+    schoolInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        currentHighlight = -1;
+        
+        if (query.length === 0) {
+            hideResults();
+            selectedSchool = null;
+            return;
+        }
+
+        const matches = schools.filter(school => 
+            school.name.toLowerCase().includes(query)
+        );
+
+        displayResults(matches, query);
+    });
+
+    // Keyboard navigation
+    schoolInput.addEventListener('keydown', function(e) {
+        const options = schoolResults.querySelectorAll('.school-option');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentHighlight = Math.min(currentHighlight + 1, options.length - 1);
+            updateHighlight(options);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentHighlight = Math.max(currentHighlight - 1, -1);
+            updateHighlight(options);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentHighlight >= 0 && options[currentHighlight]) {
+                options[currentHighlight].click(); // trigger selection
+            }
+        } else if (e.key === 'Escape') {
+            hideResults();
+        }
+    });
+
+    function displayResults(matches, query) {
+        schoolResults.innerHTML = '';
+        
+        if (matches.length === 0) {
+            schoolResults.innerHTML = '<div class="no-results">No schools found matching your search</div>';
+            schoolResults.classList.add('show');
+            return;
+        }
+
+        matches.forEach((school, index) => {
+            const option = document.createElement('div');
+            option.className = 'school-option';
+            
+            // Highlight matching text
+            const regex = new RegExp(`(${query})`, 'gi');
+            option.innerHTML = school.name.replace(regex, '<strong>$1</strong>');
+            
+            option.addEventListener('click', () => selectSchool(school));
+            option.addEventListener('mouseenter', () => {
+                currentHighlight = index;
+                updateHighlight(schoolResults.querySelectorAll('.school-option'));
+            });
+            
+            schoolResults.appendChild(option);
+        });
+        
+        schoolResults.classList.add('show');
+    }
+
+    function updateHighlight(options) {
+        options.forEach((option, index) => {
+            option.classList.toggle('highlighted', index === currentHighlight);
+        });
+    }
+
+    function selectSchool(school) {
+        schoolInput.value = school.name;
+        selectedSchool = school; // full object saved
+        document.getElementById("school_id").value = school.id
+        hideResults();
+        validateField(schoolInput, school.name.length > 0, 'schoolError');
+    }
+
+    function hideResults() {
+        schoolResults.classList.remove('show');
+        currentHighlight = -1;
+    }
+
+    // Click outside to close dropdown
+    document.addEventListener('click', function(e) {
+        if (!schoolInput.contains(e.target) && !schoolResults.contains(e.target)) {
+            hideResults();
+        }
+    });
+    
+</script>
+<script>
+     setTimeout(function () {
+        var toast = document.getElementById("toast")
+                toast.className = toast.className.replace("show", "");
+        }, 3000);
+</script>
+
+</body>
+</html>
