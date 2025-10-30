@@ -38,7 +38,7 @@ def dashboard(request):
         else:
             rank = rank + 1
 
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     event_notifications = []
     for event in event_notifications_getter:
         participating = False
@@ -51,7 +51,7 @@ def dashboard(request):
         if not participating:
             event_notifications.append(event)
     unregistered_events_count = len(event_notifications)
- 
+
     return render(
         request,
         "dashboard.html",
@@ -62,9 +62,9 @@ def dashboard(request):
             "latest_participated_events": latest_participated_events,
             "school": school,
             "school_rank": rank,
-            "unregistered_events" : event_notifications,
-            "unregistered_events_count" : unregistered_events_count, 
-            "total_no_of_schools" : total_schools
+            "unregistered_events": event_notifications,
+            "unregistered_events_count": unregistered_events_count,
+            "total_no_of_schools": total_schools,
         },
     )
 
@@ -75,7 +75,7 @@ def full_map(request):
     my_school = Student.objects.filter(student=request.user).first().school
     schools = School.objects.all()
 
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for event in event_notifications_getter:
         participating = False
@@ -89,8 +89,14 @@ def full_map(request):
             events.append(event)
     unregistered_events_count = len(events)
     return render(
-        request, "full-map.html", {"schools": schools, "my_school": my_school, "unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count}
+        request,
+        "full-map.html",
+        {
+            "schools": schools,
+            "my_school": my_school,
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
+        },
     )
 
 
@@ -98,8 +104,8 @@ def events(request):
     if not request.user.is_authenticated:
         return redirect("login")
     school = Student.objects.get(student=request.user).school
-    my_events = Events.objects.filter(organised_by=school).order_by('-created_at')
-    all_events = Events.objects.exclude(organised_by=school).order_by('-created_at')
+    my_events = Events.objects.filter(organised_by=school).order_by("-created_at")
+    all_events = Events.objects.exclude(organised_by=school).order_by("-created_at")
 
     for event in all_events:
         no_of_participants = EventParticipants.objects.filter(event=event).count()
@@ -118,7 +124,7 @@ def events(request):
         else:
             status = f"available - {expected_participants - no_of_participants}"
         event.status = status
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for event in event_notifications_getter:
         participating = False
@@ -135,8 +141,12 @@ def events(request):
     return render(
         request,
         "events.html",
-        {"global_events": all_events, "school_events": my_events, "unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count},
+        {
+            "global_events": all_events,
+            "school_events": my_events,
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
+        },
     )
 
 
@@ -174,8 +184,8 @@ def cleanup_by_school(request):
             break
         else:
             rank = rank + 1
-    
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     event_notifications = []
     for event in event_notifications_getter:
         participating = False
@@ -199,8 +209,8 @@ def cleanup_by_school(request):
             "waste": waste,
             "events_held": Events.objects.filter(organised_by=school).count(),
             "rank": rank,
-            "unregistered_events" : event_notifications,
-            "unregistered_events_count" : unregistered_events_count
+            "unregistered_events": event_notifications,
+            "unregistered_events_count": unregistered_events_count,
         },
     )
 
@@ -208,7 +218,7 @@ def cleanup_by_school(request):
 def ai_chat(request):
     if not request.user.is_authenticated:
         return redirect("login")
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for event in event_notifications_getter:
         participating = False
@@ -221,15 +231,21 @@ def ai_chat(request):
         if not participating:
             events.append(event)
     unregistered_events_count = len(events)
-    return render(request, "chat.html", {"unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count})
+    return render(
+        request,
+        "chat.html",
+        {
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
+        },
+    )
 
 
 def your_school(request):
     if not request.user.is_authenticated:
         return redirect("login")
     school = Student.objects.get(student=request.user).school
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for event in event_notifications_getter:
         participating = False
@@ -242,8 +258,15 @@ def your_school(request):
         if not participating:
             events.append(event)
     unregistered_events_count = len(events)
-    return render(request, "your-school.html", {"school": school, "unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count})
+    return render(
+        request,
+        "your-school.html",
+        {
+            "school": school,
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
+        },
+    )
 
 
 def school_admin(request, active_tab="details"):
@@ -362,8 +385,8 @@ def school_admin(request, active_tab="details"):
                 update_event.save()
                 messages.success(request, "successfully updated event progress 😤")
                 return redirect("school_admin", "events")
-    
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for event in event_notifications_getter:
         participating = False
@@ -385,8 +408,8 @@ def school_admin(request, active_tab="details"):
             "active_tab": active_tab,
             "school": admin_school,
             "events": events_list,
-            "unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
         },
     )
 
@@ -395,7 +418,7 @@ def event_page(request, event_id):
     event = Events.objects.get(id=event_id)
     starting_time = datetime.combine(event.date, event.time)
     starting_time = timezone.make_aware(starting_time, timezone.get_current_timezone())
-    is_expired=False
+    is_expired = False
     if starting_time <= timezone.now():
         is_expired = True
     participants = EventParticipants.objects.filter(event=event)
@@ -411,7 +434,7 @@ def event_page(request, event_id):
         if request.method == "POST":
             event = EventParticipants.objects.create(student=request.user, event=event)
             return redirect("event_page", event_id)
-    event_notifications_getter = Events.objects.filter(date__gt = timezone.now().date())
+    event_notifications_getter = Events.objects.filter(date__gt=timezone.now().date())
     events = []
     for notification_event in event_notifications_getter:
         participating = False
@@ -432,8 +455,8 @@ def event_page(request, event_id):
             "already_registered": already_registered,
             "participants": participants,
             "housefull": housefull,
-            "unregistered_events" : events,
-            "unregistered_events_count" : unregistered_events_count,
-            "is_expired" : is_expired
+            "unregistered_events": events,
+            "unregistered_events_count": unregistered_events_count,
+            "is_expired": is_expired,
         },
     )
